@@ -19,3 +19,5 @@ include: [".well-known"]
 
 plugins:
   - jekyll-redirect-from
+
+theme: jekyll-theme-hacker
