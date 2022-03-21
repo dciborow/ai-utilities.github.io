@@ -30,9 +30,8 @@ REFRESH_INTERVAL = 60 * 60 # 1 hour
 USE_CUSTOM_IMAGES = True
 
 def get_commits(user, repository, force_refresh=False):
-    req = requests.get(GITHUB_API + "repos/" + user + "/" + repository + "/commits")
-    commits = json.loads(req.text or req.content)
-    return commits
+    req = requests.get(f'{GITHUB_API}repos/{user}/{repository}/commits')
+    return json.loads(req.text or req.content)
 
 def create_repo_node(repo_name, image_url, count):
     return {"name" : repo_name , "image" : image_url, "group" : count, "type" : "repo"}
@@ -89,16 +88,13 @@ def update_timestamp(timestamp_file=TIMESTAMP_FILE):
         f.write(str(now))
 
 def main(command=[]):
-    force_refresh = False
-    if len(command) > 0 and command[0] == "force-refresh":
-        force_refresh = True
+    force_refresh = len(command) > 0 and command[0] == "force-refresh"
     if force_refresh or should_refresh():
         graph = create_graph_repos()
-        if graph is not None and len(graph["nodes"]) > 0:
-            with open(DATA_FILE, 'w') as f:
-                json.dump(graph, f, indent=1, sort_keys=True)
-        else:
+        if graph is None or len(graph["nodes"]) <= 0:
             raise ValueError("Empty graph generated")
+        with open(DATA_FILE, 'w') as f:
+            json.dump(graph, f, indent=1, sort_keys=True)
         update_timestamp()
 
 
